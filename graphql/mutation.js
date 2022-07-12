@@ -1,6 +1,7 @@
 const {GraphQLString} =  require('graphql')
-const {User} = require('../models/index.js')
-const {jwtn} = require('../util/auth.js')
+const {User, Post} = require('../models/index.js')
+const {jwtn} = require('../util/auth.js');
+const { PostType } = require('./type.js');
 
 const register = {
     type: GraphQLString,
@@ -31,4 +32,48 @@ const register = {
     }
 }
 
-module.exports= {register}
+const login = {
+    type: GraphQLString,
+    description: "login user and returns a token",
+    args:{
+        email: {type: GraphQLString },
+        password: {type: GraphQLString }, 
+    },
+    resolve: async(_ , args)=>{
+
+        const user = await User.findOne({email: args.email})
+        if(!user || args.password !== user.password ) 
+        throw new Error ("Invalid Credentials")
+        
+        const token = jwtn({
+            _id: user._id, 
+            userName: user.userName, 
+            email: user.email
+        })
+        return token;
+    }
+}
+
+const createPost = {
+    type: PostType,
+    description: 'Create a new post',
+    args:{
+        title:  {type: GraphQLString},
+        body: {type: GraphQLString}
+    },
+    resolve: (_, args)=>{
+        const newPost = new Post({
+            title: args.title, 
+            body: args.body,
+            authorId: "62cddaba30110557f03c523d"
+        })
+        console.log(newPost)
+        return newPost
+    }
+}
+
+module.exports= {
+    register,
+    login,
+    createPost
+}

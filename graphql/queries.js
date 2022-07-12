@@ -1,9 +1,26 @@
-const {GraphQLString} =  require('graphql')
+const {GraphQLList, GraphQLID, GraphQLString} =  require('graphql')
+const { UserType } = require('./type')
+const User = require('../models/User.js')
 
-const hello = {
-    type: GraphQLString,
-    description: "Returns a string",
-    resolve: ()=> "hello world"
-  }  
+const users = {
+    type: new GraphQLList(UserType),
+    description: "Returns list of users",
+    resolve: async()=>{ 
+      return await User.find()
+    }
+  }
 
-module.exports = { hello }
+const user = {
+    type: UserType,
+    description: "Get a user by id",
+    args: {
+      id: { type: GraphQLID}
+    },
+    resolve: async(_, args)=>{ 
+      return await User.findById(args.id)
+    }
+  }
+
+module.exports = { 
+  users,
+  user }
