@@ -1,6 +1,6 @@
 const {GraphQLList, GraphQLID, GraphQLString} =  require('graphql')
-const { UserType } = require('./type')
-const User = require('../models/User.js')
+const { UserType, PostType } = require('./type')
+const {User, Post} = require('../models/index')
 
 const users = {
     type: new GraphQLList(UserType),
@@ -21,6 +21,28 @@ const user = {
     }
   }
 
+const posts = {
+  type: new GraphQLList(PostType),
+  description: "get all posts",
+  resolve: async()=> await Post.find()
+}
+
+const post = {
+  type: PostType,
+  description: "get a post By Id",
+  args: {
+    id: { type: GraphQLID}
+  },
+  resolve: async(_, args)=> {
+    const post = await Post.findById(args.id)
+    console.log("esto es post",post)
+    return post
+  }
+}
+
 module.exports = { 
   users,
-  user }
+  user,
+  posts, 
+  post 
+}
